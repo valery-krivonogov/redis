@@ -123,3 +123,19 @@ results = exec_pipe(pipeline, "get", part)
 if show_read:
     for r in results:
         print(r)
+
+# STRING 42 MB
+part = "myList"
+m = 0
+with open('movies.json', 'r', encoding='UTF-8') as file:
+    while line := file.readline():
+        pipeline.set(part+ ":"+str(m), line.rstrip())
+        m = m + 1
+results = exec_pipe(pipeline, "set", part)
+
+for key in client.scan_iter(part+ ":*"):
+    pipeline.get(key)
+results = exec_pipe(pipeline, "get", part)
+if show_read:
+    for r in results:
+        print(r.decode("utf-8"))
