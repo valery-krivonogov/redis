@@ -260,6 +260,29 @@ results = exec_pipe(pipeline, "get", part)
 if show_read:
     for r in results:
         print(r)
+
+# JSON LIST
+part = "myListJson"
+m = 0
+with open('movies.json', 'r', encoding='UTF-8') as file:
+    while line := file.readline():
+        dict_value = eval(line.rstrip())
+        pipeline.json().set(part+ ":"+str(m), Path.root_path(), dict_value)
+        m = m + 1
+results = exec_pipe(pipeline, "set", part)
+
+for key in client.scan_iter(part+":*"):
+    pipeline.json().get(key)
+results = exec_pipe(pipeline, "get", part)
+if show_read:
+    for r in results:
+        print(r)
+
+for key in client.scan_iter(part+":*"):
+    pipeline.json().delete(key)
+results = exec_pipe(pipeline, "delete", part)
+
+
 ```
 ### Результаты выполнения тестов
 ```
@@ -279,4 +302,10 @@ myTestList get 15364 microsec
 
 myTestJson set 56991 microsec
 myTestJson get 29125 microsec
+
+myListJson set   1 342 803 microsec
+myListJson get   1 817 999 microsec
+myListJson delete  438 797 microsec
 ```
+*Размер файла movies.json - 42 Мб*
+
