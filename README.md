@@ -282,7 +282,21 @@ for key in client.scan_iter(part+":*"):
     pipeline.json().delete(key)
 results = exec_pipe(pipeline, "delete", part)
 
+# STRING file 42 MB
+part = "myList"
+m = 0
+with open('movies.json', 'r', encoding='UTF-8') as file:
+    while line := file.readline():
+        pipeline.set(part+ ":"+str(m), line.rstrip())
+        m = m + 1
+results = exec_pipe(pipeline, "set", part)
 
+for key in client.scan_iter(part+ ":*"):
+    pipeline.get(key)
+results = exec_pipe(pipeline, "get", part)
+if show_read:
+    for r in results:
+        print(r.decode("utf-8"))        
 ```
 ### Результаты выполнения тестов
 ```
@@ -306,6 +320,9 @@ myTestJson get 29125 microsec
 myListJson set   1 342 803 microsec
 myListJson get   1 817 999 microsec
 myListJson delete  438 797 microsec
+
+myList set         784 720 microsec
+myList get         535 157 microsec
 ```
 *Размер файла movies.json - 42 Мб*
 
